@@ -1,5 +1,5 @@
 # Banking System in C
-
+By Irvin Cardoza
 Welcome to the Banking System project! This application simulates basic banking operations such as account creation, balance checking, cash deposit, and withdrawal.
 
 ## Features
