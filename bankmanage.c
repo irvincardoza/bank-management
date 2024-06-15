@@ -22,7 +22,7 @@ void main_menu(){
     while(1){
     printf("WELCOME TO YOUR BANK ACCOUNT\n");
     printf("Enter number to choose option\n");
-    printf("1. Transfer Money     2. Check Balance\n3.Withdraw Cash     4.Deposit Cash\n5. Create Account     6. Exit");
+    printf("1. Transfer Money     2. Check Balance\n3.Withdraw Cash        4.Deposit Cash\n5. Create Account     6. Exit");
     int user_choice;
     printf("Enter Choice:  ");
     scanf("%d",&user_choice);
@@ -115,6 +115,10 @@ void cash_out(){
             int amt_to_add;
             printf("\nSuccess!\nEnter amount to withdraw: ");
             scanf("%d",&amt_to_add);
+            if(amt_to_add>add.balance){
+                printf("Broke!");
+                exit(0);
+            }
             
             while ((c = getchar()) != '\n' && c != EOF);
             int temp_pin;
@@ -123,7 +127,7 @@ void cash_out(){
              
             while ((c = getchar()) != '\n' && c != EOF);
             if(temp_pin==add.pin){
-                printf("Deposit successful! ");
+                printf("Withdrawal successful! ");
                 add.balance-=amt_to_add;
                 fseek(f, -sizeof(struct account), SEEK_CUR);
                 fwrite(&add,sizeof(add),1,f);
@@ -153,6 +157,7 @@ void cash_out(){
 
     
 }
+
 void cash_in(){
     FILE*f;
     struct account add;
@@ -169,7 +174,7 @@ void cash_in(){
     while(fread(&add,sizeof(add),1,f)==1){
         if(temp_num==add.acc_num){
             int amt_to_add;
-            printf("\nSuccess!\nEnter amount to deposit: ");
+            printf("\nEnter amount to deposit: ");
             scanf("%d",&amt_to_add);
             
             while ((c = getchar()) != '\n' && c != EOF);
@@ -210,11 +215,119 @@ void cash_in(){
 
 
 }
-void transfer(){
-    NULL;
+
+void transfer() {
+    FILE *f;
+    struct account source, destination;
+    unsigned long long source_acc_num, dest_acc_num;
+    int transfer_amount, pin, found_source = 0, found_destination = 0;
+
+    f = fopen("acc.txt", "rb+");
+    if (f == NULL) {
+        printf("Error, record file not found!\n");
+        return;
+    }
+
+    printf("Enter your account number: \n");
+    scanf("%llu", &source_acc_num);
+    printf("Enter your pin: \n");
+    scanf("%d", &pin);
+    printf("Enter destination account number: \n");
+    scanf("%llu", &dest_acc_num);
+    printf("Enter transfer amount: \n");
+    scanf("%d", &transfer_amount);
+
+    while (fread(&source, sizeof(source), 1, f) == 1) {
+        if (source.acc_num == source_acc_num) {
+            found_source = 1;
+            if (source.pin == pin) {
+                if (source.balance >= transfer_amount) {
+                    fseek(f, 0, SEEK_SET);
+                    while (fread(&destination, sizeof(destination), 1, f) == 1) {
+                        if (destination.acc_num == dest_acc_num) {
+                            found_destination = 1;
+                            break;
+                        }
+                    }
+
+                    if (found_destination) {
+                        source.balance -= transfer_amount;
+                        destination.balance += transfer_amount;
+
+                        // Update destination account balance
+                        fseek(f, -sizeof(struct account), SEEK_CUR);
+                        fwrite(&destination, sizeof(destination), 1, f);
+
+                        // Update source account balance
+                        fseek(f, 0, SEEK_SET);
+                        while (fread(&source, sizeof(source), 1, f) == 1) {
+                            if (source.acc_num == source_acc_num) {
+                                fseek(f, -sizeof(struct account), SEEK_CUR);
+                                fwrite(&source, sizeof(source), 1, f);
+                                break;
+                            }
+                        }
+
+                        printf("Transaction successful! \n");
+                    } else {
+                        printf("Destination account not found!\n");
+                    }
+                } else {
+                    printf("Insufficient balance!\n");
+                }
+            } else {
+                printf("Incorrect pin\n");
+            }
+            break;
+        }
+    }
+
+    if (!found_source) {
+        printf("Source account not found!\n");
+    }
+
+    fclose(f);
+    printf("Enter any key to continue...");
+    getchar();
+    getchar();
+    main_menu();
 }
+
+
 void check_balance(){
-    NULL;
+    FILE *f;
+    struct account acc;
+    unsigned long long temp_num;
+    int temp_pin, found = 0;
+
+  printf("Enter account number: ");
+    scanf("%llu", &temp_num);
+  printf("Enter 4 digit pin: ");
+    scanf("%d", &temp_pin);
+
+    f = fopen("acc.txt", "rb");
+    if (f == NULL) {
+        printf("Error!\n");
+        return;
+    }
+
+    while(fread(&acc,sizeof(acc), 1, f) == 1) {
+        if (acc.acc_num == temp_num && acc.pin == temp_pin) {
+            found = 1;
+            printf("Your account balance is: %d\n", acc.balance);
+            break;
+        }
+    }
+
+    if(!found) {
+        printf("Account number or pin incorrect.\n");
+    }
+
+    fclose(f);
+    printf("Enter any key to continue...");
+    getchar();
+    getchar();
+    
 }
 
 int main() {
