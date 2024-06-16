@@ -8,8 +8,8 @@ Welcome to the Banking System project! This application simulates basic banking 
 - **Create Account**: Generate a unique account number and set a 4-digit PIN.
 - **Deposit Cash**: Deposit money into an account after PIN verification.
 - **Withdraw Cash**: Withdraw money from an account after PIN verification.
-- **Check Balance**: (To be implemented)
-- **Transfer Money**: (To be implemented)
+- **Check Balance**: 
+- **Transfer Money**: (in progress)
 
 ## Getting Started
 
@@ -46,9 +46,9 @@ After compiling, run the executable:
 
 ## To Do
 
-- Implement the `check_balance` function.
+
 - Implement the `transfer` function.
-- Improve input validation and error handling.
+
 
 ## Contributing
 
