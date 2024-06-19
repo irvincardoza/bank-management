@@ -21,7 +21,7 @@ Welcome to the Banking System project! This application simulates basic banking 
 
 1. Clone the repository:
     ```sh
-    git clone https://github.com/irvincardoza/banking-system.git
+    git clone https://github.com/irvincardoza/bank-management.git
     ```
 2. Navigate to the project directory:
     ```sh
