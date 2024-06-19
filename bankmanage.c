@@ -220,7 +220,9 @@ void transfer() {
     FILE *f;
     struct account source, destination;
     unsigned long long source_acc_num, dest_acc_num;
-    int transfer_amount, pin, found_source = 0, found_destination = 0;
+    int transfer_amount, pin;
+    int found_source = 0, found_destination = 0;
+    long source_pos = 0, dest_pos = 0;
 
     f = fopen("acc.txt", "rb+");
     if (f == NULL) {
@@ -237,53 +239,65 @@ void transfer() {
     printf("Enter transfer amount: \n");
     scanf("%d", &transfer_amount);
 
+    // Read the file to find the source account
     while (fread(&source, sizeof(source), 1, f) == 1) {
         if (source.acc_num == source_acc_num) {
             found_source = 1;
             if (source.pin == pin) {
                 if (source.balance >= transfer_amount) {
-                    fseek(f, 0, SEEK_SET);
+                    // Store the position of the source account
+                    source_pos = ftell(f) - sizeof(source);
+
+                    // Now find the destination account
                     while (fread(&destination, sizeof(destination), 1, f) == 1) {
                         if (destination.acc_num == dest_acc_num) {
                             found_destination = 1;
+                            dest_pos = ftell(f) - sizeof(destination);
                             break;
                         }
                     }
-
-                    if (found_destination) {
-                        source.balance -= transfer_amount;
-                        destination.balance += transfer_amount;
-
-                        // Update destination account balance
-                        fseek(f, -sizeof(struct account), SEEK_CUR);
-                        fwrite(&destination, sizeof(destination), 1, f);
-
-                        // Update source account balance
-                        fseek(f, 0, SEEK_SET);
-                        while (fread(&source, sizeof(source), 1, f) == 1) {
-                            if (source.acc_num == source_acc_num) {
-                                fseek(f, -sizeof(struct account), SEEK_CUR);
-                                fwrite(&source, sizeof(source), 1, f);
-                                break;
-                            }
-                        }
-
-                        printf("Transaction successful! \n");
-                    } else {
-                        printf("Destination account not found!\n");
-                    }
+                    break;
                 } else {
                     printf("Insufficient balance!\n");
+                    fclose(f);
+                    printf("Enter any key to continue...");
+                    getchar();
+                    getchar();
+                    main_menu();
+                    return;
                 }
             } else {
                 printf("Incorrect pin\n");
+                fclose(f);
+                printf("Enter any key to continue...");
+                getchar();
+                getchar();
+                main_menu();
+                return;
             }
-            break;
         }
     }
 
     if (!found_source) {
         printf("Source account not found!\n");
+    } else if (!found_destination) {
+        printf("Destination account not found!\n");
+    } else {
+        
+        source.balance -= transfer_amount;
+        destination.balance += transfer_amount;
+
+        
+        fseek(f, dest_pos, SEEK_SET);
+        fwrite(&destination, sizeof(destination), 1, f);
+        // printf("Updated destination account balance: %d\n", destination.balance); // Debug print
+
+        
+        fseek(f, source_pos, SEEK_SET);
+        fwrite(&source, sizeof(source), 1, f);
+        // printf("Updated source account balance: %d\n", source.balance); // Debug print
+
+        printf("Transaction successful! \n");
     }
 
     fclose(f);
