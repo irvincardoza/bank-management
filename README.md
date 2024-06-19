@@ -21,23 +21,18 @@ Welcome to the Banking System project! This application simulates basic banking 
 
 1. Clone the repository:
     ```sh
-    git clone https://github.com/irvincardoza/banking-system.git
+    git clone https://github.com/irvincardoza/bank-management.git
     ```
 2. Navigate to the project directory:
-    ```sh
-    cd banking-system
-    ```
-3. Compile the source code:
-    ```sh
-    gcc -o banking_system main.c
-    ```
+   
+- Single file, no separate folder
+   
+4. Compile the source code:
 
-### Running the Project
+- Requires gcc compiler pre-installed 
+   
 
-After compiling, run the executable:
-```sh
-./banking_system
-```
+
 
 ## Usage
 
